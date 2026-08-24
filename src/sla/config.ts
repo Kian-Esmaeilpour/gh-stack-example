@@ -6,6 +6,6 @@ export type Priority = (typeof PRIORITIES)[number];
 export const RESPONSE_HOURS: Record<Priority, number> = {
   low: 72,
   normal: 24,
-  high: 4,
+  high: 2,
   urgent: 1,
 };
