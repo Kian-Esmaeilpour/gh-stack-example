@@ -45,11 +45,11 @@ export const RESPONSE_HOURS: Record<Priority, number> = {
   low: 72,
   normal: 24,
 <<<<<<< HEAD
-  high: 8,
+  high: 4,
   urgent: 1,
 =======
   high: 2,
->>>>>>> a0b5d99 (Add SLA deadline policy and tighten the high-priority target)
+>>>>>>> 1a2b3c4 (Add SLA deadline policy and tighten the high-priority target)
 };
 ```
 
@@ -78,6 +78,11 @@ gh stack rebase --continue
 ✓ Rebased sla-policy onto sla-config
 ✓ Rebased sla-report onto sla-policy
 ```
+
+> **You may see a smaller conflict than the one above.** Once `rerere` has recorded a resolution,
+> a later replay of the same conflict is partially auto-resolved — git re-applies the part it has
+> seen (`urgent: 1` surviving) and leaves you only the genuinely new disagreement (`high: 4` vs
+> `high: 2`). That is `rerere` working, not a different conflict.
 
 Then push:
 
