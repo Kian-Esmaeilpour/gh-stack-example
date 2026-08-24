@@ -1,0 +1,14 @@
+{
+  "name": "gh-stack-example",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small TypeScript service used to demonstrate native GitHub stacked PRs with gh-stack",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
