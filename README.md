@@ -1,27 +1,40 @@
 # gh-stack-example
 
-A deliberately small TypeScript project used to demonstrate **native GitHub stacked pull requests**
-via the [`gh-stack`](https://github.com/github/gh-stack) CLI extension.
+A deliberately small TypeScript project demonstrating **native GitHub stacked pull requests** via
+the [`gh-stack`](https://github.com/github/gh-stack) CLI extension.
 
-The code here is intentionally boring. The interesting part is the *shape of the pull requests*:
-each stack below is a chain of small PRs where every PR's base is the branch below it, so reviewers
-only ever see one layer of diff at a time.
+The code is intentionally boring. The interesting part is the *shape of the pull requests*: each
+stack below is a chain of small PRs where every PR's base is the branch below it, so a reviewer
+only ever sees one layer of diff at a time.
+
+Every stack here starts from a **product backlog item**, not from a set of files — the recurring
+question is "how does one PBI become four or six PRs instead of one?"
+
+## Start here
+
+**[docs/scenarios/00-pbi-to-stack.md](docs/scenarios/00-pbi-to-stack.md)** — how to find the layer
+boundaries in a backlog item, when tests deserve their own PR, and when a stack is the wrong tool.
 
 ## Setup
 
 ```bash
 gh extension install github/gh-stack
-git config rerere.enabled true        # remember conflict resolutions
+git config rerere.enabled true        # remember conflict resolutions across rebases
 git config remote.pushDefault origin  # avoid the remote picker
 ```
 
 ## Scenarios
 
-| # | Stack | What it demonstrates | Walkthrough |
-|---|-------|----------------------|-------------|
-| 1 | Ticket store feature | The happy path: a layered feature split into 4 reviewable PRs | [docs/scenarios/01-happy-path.md](docs/scenarios/01-happy-path.md) |
-| 2 | Search & filtering | Discovering mid-stack that a lower layer must change, then `rebase --upstack` | [docs/scenarios/02-mid-stack-change.md](docs/scenarios/02-mid-stack-change.md) |
-| 3 | Priority & SLA | Rebase conflicts, `rerere`, and recovering after a squash-merge with `sync --prune` | [docs/scenarios/03-conflicts-and-sync.md](docs/scenarios/03-conflicts-and-sync.md) |
+| # | PBI | Demonstrates | PRs | Walkthrough |
+|---|-----|--------------|-----|-------------|
+| 1 | Support agents track customer tickets | The happy path: `init` → `add` → `submit`, navigation, merging | [#1](../../pull/1) → [#4](../../pull/4) | [01-happy-path.md](docs/scenarios/01-happy-path.md) |
+| 2 | On-call engineers get notified on their channel | Discovering mid-stack that a *lower* layer must change, and `rebase --upstack` | [#6](../../pull/6) → [#8](../../pull/8) | [02-mid-stack-change.md](docs/scenarios/02-mid-stack-change.md) |
+| 3 | Service owners see SLA breaches automatically | A real rebase conflict, `rerere`, and `sync --prune` after a squash-merge | [#10](../../pull/10) → [#12](../../pull/12) | [03-conflicts-and-sync.md](docs/scenarios/03-conflicts-and-sync.md) |
+| 4 | Customers see where their order is | One PBI → contract, BFF, frontend, and **separate unit-test PRs** | [#14](../../pull/14) → [#19](../../pull/19) | [04-bff-frontend-tests.md](docs/scenarios/04-bff-frontend-tests.md) |
+
+All PRs are left **open and ready for review** so the stacks can be explored in the GitHub UI.
+Each PR body states the PBI, what that layer does, what it deliberately excludes, and what to
+review.
 
 ## The mental model
 
@@ -32,6 +45,32 @@ main (trunk)
    └── layer-3 → PR #3 (base: layer-2)       ← top, furthest from trunk
 ```
 
-`gh stack up` / `down` move away from / toward trunk. `top` and `bottom` jump to the ends.
-Foundational code (types, storage) belongs in **lower** branches; consumers (API, UI, tests)
-belong in **higher** ones.
+`gh stack up` / `down` move away from / toward trunk; `top` and `bottom` jump to the ends.
+
+The one hard rule: **dependencies run downward.** If code in layer A imports code from layer B,
+B must be at or below A. Foundational work (types, contracts, schema) goes low; consumers (API,
+UI, wiring) go high.
+
+## Command cheat sheet
+
+| Task | Command |
+|------|---------|
+| Start a stack | `gh stack init <branch>` |
+| Add a layer | `gh stack add <branch>` |
+| Open/update all PRs | `gh stack submit --auto --open` |
+| Inspect the stack | `gh stack view --json` |
+| Move around | `gh stack up` / `down` / `top` / `bottom` |
+| Replay layers above a change | `gh stack rebase --upstack` |
+| Continue after a conflict | `git add <file>` then `gh stack rebase --continue` |
+| Undo a rebase entirely | `gh stack rebase --abort` |
+| Routine catch-up with trunk | `gh stack sync --prune` |
+| Merge the stack | `gh stack merge --yes --squash` |
+| Restructure (reorder/rename) | `gh stack unstack` then `gh stack init ...` |
+
+### Non-interactive flags that are not optional
+
+`view` without `--json` opens a TUI; `submit` without `--auto` prompts for every PR title; `init`,
+`add`, and `checkout` prompt when given no argument. In scripts, CI, or agent workflows, always
+pass them.
+
+`gh pr merge` does **not** work on stacked PRs — use `gh stack merge`.
