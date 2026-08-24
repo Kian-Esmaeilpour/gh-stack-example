@@ -33,6 +33,12 @@ presentation code and nothing else — no aggregation logic in the diff to skim 
 mirrors how the work is usually assigned: the two layers could be built by different people in
 parallel, both against the contract in PR #14.
 
+There is a cost to be honest about. A stack is **strictly linear** — one parent, one child — so
+even though `order-status/web` depends only on the contract, it sits above the BFF and its tests
+and cannot merge until they do. Work that is genuinely independent gets serialised. If the
+frontend needs to ship on its own schedule, give it a **separate stack** rooted on the contract
+branch (or on trunk once the contract has merged) rather than forcing it into this one.
+
 **Tests as their own PRs.** PRs #16 and #18 contain only test files. The upside: the
 implementation PR stays readable, and the test PR reads as an executable statement of expected
 behaviour that reviewers can argue with on its own terms.

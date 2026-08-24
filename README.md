@@ -23,6 +23,10 @@ git config rerere.enabled true        # remember conflict resolutions across reb
 git config remote.pushDefault origin  # avoid the remote picker
 ```
 
+> **Note:** dependencies are declared but not installed here — there is no lockfile and no
+> `node_modules`, so `npm test` and `npm run check` will not run as-is. The test files in scenario 4
+> are there to be *read* as PR content. Run `npm install` first if you want them to execute.
+
 ## Scenarios
 
 | # | PBI | Demonstrates | PRs | Walkthrough |
