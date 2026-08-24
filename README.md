@@ -32,6 +32,46 @@ git config remote.pushDefault origin  # avoid the remote picker
 | 3 | Service owners see SLA breaches automatically | A real rebase conflict, `rerere`, and `sync --prune` after a squash-merge | [#10](../../pull/10) → [#12](../../pull/12) | [03-conflicts-and-sync.md](docs/scenarios/03-conflicts-and-sync.md) |
 | 4 | Customers see where their order is | One PBI → contract, BFF, frontend, and **separate unit-test PRs** | [#14](../../pull/14) → [#19](../../pull/19) | [04-bff-frontend-tests.md](docs/scenarios/04-bff-frontend-tests.md) |
 
+### PR title convention
+
+Every PR in this repo is titled:
+
+```
+[S<scenario> <layer>/<total> <slug>] <what the layer does>
+     │            │       │      │
+     │            │       │      └── theme, so the scenario is obvious at a glance
+     │            │       └────────── how many PRs are in the stack
+     │            └────────────────── this PR's position, bottom = 1
+     └─────────────────────────────── scenario number (matches the table above)
+```
+
+So `[S4 3/6 bff-frontend-tests] Add unit tests for the order status BFF` reads as: scenario 4,
+third of six PRs, the BFF/frontend/tests split.
+
+This exists because the PR **list** view is where you lose the thread — GitHub shows the stack
+relationship on the PR page and in the stack UI, but a flat list of sixteen PRs is unreadable
+without it. The prefix also makes the list sort into coherent groups, and `x/y` tells a reviewer
+where to start (always `1/y`) without opening anything.
+
+`gh stack submit --auto` generates titles from commit subjects, so it will not produce this format
+on its own — the prefixes here were applied afterwards with `gh pr edit --title`. On a real team
+you would either adopt a shorter convention (many teams use just `[1/4]`) or add the prefix to the
+commit subject itself so `--auto` picks it up.
+
+### Scenario number vs. GitHub stack number
+
+The `S1`–`S4` above are this repo's own numbering. GitHub assigns its own stack numbers, which are
+what `gh stack checkout <n>` and `gh stack merge <n>` expect:
+
+| Scenario | GitHub stack | Check it out with |
+|----------|--------------|-------------------|
+| S1 happy-path | #5 | `gh stack checkout 5` |
+| S2 mid-stack-rebase | #9 | `gh stack checkout 9` |
+| S3 conflict-recovery | #13 | `gh stack checkout 13` |
+| S4 bff-frontend-tests | #20 | `gh stack checkout 20` |
+
+They differ because GitHub numbers stacks and PRs from the same sequence.
+
 All PRs are left **open and ready for review** so the stacks can be explored in the GitHub UI.
 Each PR body states the PBI, what that layer does, what it deliberately excludes, and what to
 review.
