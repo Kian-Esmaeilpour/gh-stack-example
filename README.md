@@ -37,26 +37,24 @@ git config remote.pushDefault origin  # avoid the remote picker
 Every PR in this repo is titled:
 
 ```
-[S<scenario> <layer>/<total> <slug>] <what the layer does>
-     │            │       │      │
-     │            │       │      └── theme, so the scenario is obvious at a glance
-     │            │       └────────── how many PRs are in the stack
-     │            └────────────────── this PR's position, bottom = 1
-     └─────────────────────────────── scenario number (matches the table above)
+[S<scenario> <slug>] <what the layer does>
+     │          │
+     │          └── theme, so the scenario is obvious at a glance
+     └───────────── scenario number (matches the table above)
 ```
 
-So `[S4 3/6 bff-frontend-tests] Add unit tests for the order status BFF` reads as: scenario 4,
-third of six PRs, the BFF/frontend/tests split.
+So `[S4 bff-frontend-tests] Add unit tests for the order status BFF` reads as: scenario 4, the
+BFF/frontend/tests split, and this PR adds the backend tests.
 
-This exists because the PR **list** view is where you lose the thread — GitHub shows the stack
-relationship on the PR page and in the stack UI, but a flat list of sixteen PRs is unreadable
-without it. The prefix also makes the list sort into coherent groups, and `x/y` tells a reviewer
-where to start (always `1/y`) without opening anything.
+This exists because the PR **list** view is where you lose the thread. On the PR page and in the
+stack UI, GitHub already shows the stack and this PR's position in it — so the title deliberately
+does *not* repeat the position. A flat list of sixteen PRs, though, shows none of that, and the
+prefix is what makes the list group into coherent stacks at a glance.
 
 `gh stack submit --auto` generates titles from commit subjects, so it will not produce this format
 on its own — the prefixes here were applied afterwards with `gh pr edit --title`. On a real team
-you would either adopt a shorter convention (many teams use just `[1/4]`) or add the prefix to the
-commit subject itself so `--auto` picks it up.
+you would put the prefix in the commit subject so `--auto` picks it up, or skip it entirely and
+rely on the stack UI.
 
 ### Scenario number vs. GitHub stack number
 
